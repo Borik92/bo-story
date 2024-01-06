@@ -8,7 +8,6 @@ Welcome to the BO Story library. Use this library to integrate story-styled inte
 - [Usage](#Usage)
 - [Destroy](#Destroy)
 - [Configurations](#Configurations)
-- [GitHub](#GitHub)
 
 ## Demo
 
@@ -247,9 +246,3 @@ interface IBoStyleConfigs {
     --bo-custom-scrollbar-track-thumb-bg-color
     --bo-custom-scrollbar-track-thumb-bg-outline
 ```
-
-## GitHub
-
-You can find the source code for this project on GitHub:
-
-[GitHub Repository](https://github.com/Borik92/bo-story)
