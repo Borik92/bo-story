@@ -22,6 +22,10 @@
     "last 2 Firefox versions",
     "last 2 Safari versions"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Borik92/bo-story.git"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
