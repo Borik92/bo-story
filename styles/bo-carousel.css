@@ -1,0 +1,104 @@
+.bo-popup-container .bo-popup-wrapper {
+    perspective: 1000px;
+    font-family: inherit;
+}
+
+.bo-popup-body-paused .bo-story-item-header,
+.bo-popup-body-paused .bo-story-item-footer {
+    animation: bo-story-pause .3s linear forwards;
+}
+
+.bo-popup-container-closed {
+    background: transparent;
+}
+
+.bo-story-small-screen .bo-popup-container-closed-to-left {
+    position: fixed;
+    background: transparent;
+    animation: bo-story-close-popup-to-left .2s linear forwards;
+    overflow: hidden;
+}
+
+.bo-story-small-screen .bo-popup-container-closed-to-right {
+    position: fixed;
+    background: transparent;
+    animation: bo-story-close-popup-to-right .2s linear forwards;
+    overflow: hidden;
+}
+
+.bo-popup-container .bo-popup-body {
+    position: relative;
+    transform-style: preserve-3d;
+    transition: scale .5s;
+    transition-timing-function: linear;
+}
+
+.bo-popup-container .bo-popup-body-transition {
+    transition: transform .2s ease-out;
+}
+
+.bo-popup-container .bo-popup-body-transition-fast {
+    /*transition: transform .1s, scale .5s;*/
+    transition-timing-function: linear;
+}
+
+.bo-popup-container .bo-carousel-cell {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+.bo-popup-container .bo-carousel-cell-transition {
+    /*transition: transform .5s, opacity .5s;*/
+    transition-timing-function: linear;
+}
+
+.bo-popup-container .bo-screen-layer {
+    top: 0;
+    left: 0;
+    position: fixed;
+    height: calc(var(--real-vh) * 100); /* This is equivalent to 100vh */
+    width: 100vw;
+    z-index: 1000;
+    background: transparent;
+}
+
+.bo-popup-container .carousel-options {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    background: hsla(0, 0%, 100%, 0.8);
+}
+
+@keyframes bo-story-close-popup-to-left {
+    from {
+        left: 0;
+        top: 0;
+    }
+    to {
+        left: 20vw;
+        top: 0;
+    }
+}
+
+@keyframes bo-story-close-popup-to-right {
+    from {
+        left: 0;
+        top: 0;
+    }
+    to {
+        left: -20vw;
+        top: 0;
+    }
+}
+
+@keyframes bo-story-pause {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
