@@ -1,6 +1,6 @@
 {
   "name": "bo-story",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "bo-story-bundle.js",
   "scripts": {
@@ -26,7 +26,22 @@
     "type": "git",
     "url": "git+https://github.com/Borik92/bo-story.git"
   },
-  "keywords": [],
+  "keywords": [
+    "story",
+    "stories",
+    "facebook",
+    "instagram",
+    "slider",
+    "storytelling",
+    "social",
+    "photo",
+    "video",
+    "mobile",
+    "web",
+    "interactive",
+    "media",
+    "viewer"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
