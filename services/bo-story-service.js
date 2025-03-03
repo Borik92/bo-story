@@ -105,7 +105,7 @@ export class BoStoryService {
 
         itemsToLoad.forEach((story, index) => {
             const storyElement = this.createStoryElement(story, index);
-            this.dataService.storyContainer.append(storyElement);
+            this.dataService.storyContainer?.append?.(storyElement);
         });
     }
 }
