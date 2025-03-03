@@ -6,6 +6,7 @@ Welcome to the BO Story library. Use this library to integrate story-styled inte
 - [Demo](#Demo)
 - [Installation](#Installation)
 - [Usage](#Usage)
+- [Open Story Manually](#OpenStoryManually)
 - [Destroy](#Destroy)
 - [Configurations](#Configurations)
 
@@ -27,7 +28,7 @@ npm install bo-story
 
 To use the `BO Story` library in your project, follow these steps:
 
-Include `node_modules/bo-story/bo-story-bundle.css` and `node_modules/bo-story/bo-story-bundle.mjs`to your project.
+Include `node_modules/bo-story/bo-story-bundle.css` with `node_modules/bo-story/bo-story-bundle.mjs` or `node_modules/bo-story/bo-story-bundle.js` to your project.
 
 ```ts
 import {BoStory} from 'bo-story/bo-story-bundle';
@@ -52,7 +53,7 @@ const options: IBoStoryOptions = {
 const boStory = new BoStory(options);
 ```
 
-## Events
+## Alternative Events
 `bo-story-seen`
 
 `bo-story-item-seen`
@@ -86,6 +87,23 @@ const options: IBoStoryOptions = {
 
 const boStory = new BoStory(options);
 ```
+
+## OpenStoryManually
+
+```ts
+/* To open story manually call openStory method */
+boStory.openStory(id, isVideoMuted = false);
+```
+
+
+## CloseDialog
+
+```ts
+/* To close story dialog manually call closeDialog method */
+boStory.closeDialog();
+```
+
+
 ## Destroy
 
 ```ts
@@ -110,6 +128,7 @@ interface IBoStory {
     id: number | string;
     name: string;
     imageUrl: string;
+    imgAlt?: string;
     items: IBoStoryItem[];
     titleNestedHtml?: string;
 }
@@ -127,6 +146,8 @@ interface IBoStoryItem {
     description?: string;
     footerNestedHtml?: string;
     caption?: string;
+    footerNestedActionHtml?: string;
+    imgAlt?: string;
 }
 
 interface IBoEvents {
@@ -142,10 +163,23 @@ interface IBoEvents {
 
 /* Available configs. Configs object and it's all properties are optional */
 interface IBoConfigs {
-    isSmScreenScrollbarHidden?: boolean; // true by default
-    seenByStoryItemOpen?: boolean;
-    isCustomScrollbar?: boolean;
-    document?: Document; // In case of SRR is need to pass Document object
+    seenByStoryItemOpen: boolean; // default true
+    storyItemCountToRend: number, // Lazy loading story item count. By default is 50,
+    svgElements: {
+        arrowLeftIcon: string, // String SVG elemnt example: `<svg>...</svg>`
+        arrowRightIcon: string,
+        closeIcon: string,
+        likeIcon: string,
+        fullScreenIcon: string,
+        exitFullScreenIcon: string,
+        mutatedIcon: string,
+        unmutatedIcon: string,
+        playIcon: string,
+        pauseIcon: string,
+        storyImageLoaderIcon: string,
+        storyItemImageLoaderIcon: string
+    },
+    document: document // Document
 }
 
 /* Available style configs. Style configs object and it's all properties are optional */
@@ -185,6 +219,8 @@ interface IBoStyleConfigs {
     bo_popup_z_index?: string,
 
     /*  Custom Scrollbar  */
+    bo_is_sm_screen_scrollbar_hidden : boolean,
+    bo_is_custom_scrollbar : boolean,
     bo_custom_scrollbar_width?: string,
     bo_custom_scrollbar_height?: string,
     bo_scrollbar_distance?: string,

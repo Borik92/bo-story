@@ -29,7 +29,6 @@
 .bo-popup-container .bo-popup-body {
     position: relative;
     transform-style: preserve-3d;
-    transition: scale .5s;
     transition-timing-function: linear;
 }
 
@@ -45,9 +44,12 @@
 .bo-popup-container .bo-carousel-cell {
     position: absolute;
     width: 100%;
-    height: 100%;
     left: 0;
     top: 0;
+}
+
+.bo-carousel-cell-fixed-height {
+    height: 100%;
 }
 
 .bo-popup-container .bo-carousel-cell-transition {

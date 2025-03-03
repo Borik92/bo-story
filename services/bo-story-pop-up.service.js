@@ -82,11 +82,12 @@ export class BoStoryPopUpService {
 
             const header = currentCellElement.querySelector('.bo-story-item-header');
             const footer = currentCellElement.querySelector('.bo-story-item-footer');
+            const footerNestedActionHtmlBody = currentCellElement.querySelector('.bo-footer-nested-action-html-body');
             const popupBodySideWrapper = this.dataService.document.querySelector('.bo-popup-body-side-wrapper');
             const popupContainer = this.dataService.document.querySelector('.bo-popup-container');
             const topMargin = 30;
 
-            popupBodySideWrapper.style.height = `${popupContainer.offsetHeight  + topMargin - (header.offsetHeight + footer.offsetHeight + 30)}px`;
+            popupBodySideWrapper.style.height = `${popupContainer.offsetHeight  + topMargin - (header.offsetHeight + footer.offsetHeight + footerNestedActionHtmlBody.offsetHeight + 30)}px`;
             popupBodySideWrapper.style.top = `${header.offsetHeight}px`;
         });
     }
@@ -146,16 +147,11 @@ export class BoStoryPopUpService {
 
 
         const currentCellElement = this.getCurrentStoryCellElement();
-        const currentVideoElement = currentCellElement.querySelector('.bo-story-item-video');
         const currentImgElement = currentCellElement.querySelector('.bo-story-item-img');
-        const preloader = currentVideoElement.closest('.bo-story-item').querySelector('.bo-media-preloader-body');
 
-        if (this.dataService.currentStoryItem.mediaType === this.utilsService.BO_STORY_MEDIA_TYPE.video) {
-            currentVideoElement.addEventListener('canplaythrough',  this.videoLoadingState(currentVideoElement, preloader));
-        } else {
+        if (this.dataService.currentStoryItem.mediaType === this.utilsService.BO_STORY_MEDIA_TYPE.photo) {
             currentImgElement.src = this.dataService.currentStoryItem.storyUrl;
             currentImgElement.addEventListener('load', function checkProgress () {
-                preloader.classList.add('bo-hidden');
                 currentImgElement.removeEventListener('load', checkProgress);
             });
         }
@@ -169,7 +165,6 @@ export class BoStoryPopUpService {
         const currentCellElement = this.getCurrentStoryCellElement();
         const videoElement = currentCellElement.querySelector('.bo-story-item-video');
         const imgElement = currentCellElement.querySelector('.bo-story-item-img');
-        const preloader = currentCellElement.querySelector('.bo-media-preloader-body');
         videoElement.classList.add('bo-hidden');
         imgElement.classList.add('bo-hidden');
 
@@ -214,13 +209,8 @@ export class BoStoryPopUpService {
 
             if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
                 this.triggerStoryItemProgressBar();
-                preloader.classList.add('bo-hidden');
             } else {
                 this.mediaLoadingTimeout = setTimeout(() => {
-                    if (!(videoElement.readyState >= videoElement.HAVE_METADATA)) {
-                        preloader.classList.remove('bo-hidden');
-                    }
-
                     if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
                         if (videoElement.getAttribute('id') === this.mediaElementIdGenerator(this.dataService.currentStoryItem.id, 'video')) {
                             this.triggerStoryItemProgressBar();
@@ -237,7 +227,6 @@ export class BoStoryPopUpService {
                                     this.triggerStoryItemProgressBar();
                                 }
                             });
-                            preloader.classList.add('bo-hidden');
                             videoElement.removeEventListener('canplaythrough', checkProgress);
                         }
                         videoElement.addEventListener('canplaythrough',  checkProgress);
@@ -248,16 +237,10 @@ export class BoStoryPopUpService {
         } else if (this.dataService.currentStoryItem.mediaType === this.utilsService.BO_STORY_MEDIA_TYPE.photo) {
             imgElement.classList.remove('bo-hidden');
             if (imgElement.complete) {
-                preloader.classList.add('bo-hidden');
                 this.triggerStoryItemProgressBar();
             } else {
                 this.mediaLoadingTimeout = setTimeout(() => {
-                    if (!imgElement.complete) {
-                        preloader.classList.remove('bo-hidden');
-                    }
-
                     if (imgElement.complete) {
-                        preloader.classList.add('bo-hidden');
                         this.triggerStoryItemProgressBar();
                         return;
                     }
@@ -273,7 +256,6 @@ export class BoStoryPopUpService {
                                 this.triggerStoryItemProgressBar();
                             }
                         }, 100);
-                        preloader.classList.add('bo-hidden');
                         imgElement.removeEventListener('load', checkProgress);
                     }
                     imgElement.addEventListener('load', checkProgress );
@@ -321,7 +303,7 @@ export class BoStoryPopUpService {
         }
     }
 
-    updateCubeCellElement = (story, storyItem, index, isPlay = true) => {
+    updateCubeCellElement = (story, storyItem, index, isPlay = true, updateMedia = true) => {
         if (!this.isStoryPopupOpened) {
             return;
         }
@@ -339,9 +321,11 @@ export class BoStoryPopUpService {
         const storyItemLikeCount = cellElement.querySelector(`.bo-story-item-like-count`);
         const storyItemCaption = cellElement.querySelector(`.bo-story-tem-caption`);
         const likeIconBtn = cellElement.querySelector(`.bo-story-item-like-btn`);
-        const footerNestedHtmlBody = cellElement.querySelector(`.bo-footer-nested-html-body`);
         const fullScreenIcon = cellElement.querySelector(`.bo-full-screen-icon`);
         const exitFullScreenIcon = cellElement.querySelector(`.bo-exit-full-screen-icon`);
+        const footerNestedHtmlBody = cellElement.querySelector(`.bo-footer-nested-html-body`);
+        const footerNestedActionHtmlBody = cellElement.querySelector('.bo-footer-nested-action-html-body');
+        const storyItemElement = cellElement.querySelector('.bo-story-item');
 
         headerUserImg.src = story.imageUrl;
         headerInfoText.innerText = story.name;
@@ -349,8 +333,6 @@ export class BoStoryPopUpService {
         mutedIcon.classList.add('bo-hidden');
         unmutatedIcon.classList.add('bo-hidden');
         storyItemCaption.classList.add('bo-hidden');
-        videoElement.classList.add('bo-hidden');
-        imgElement.classList.add('bo-hidden');
         fullScreenIcon.classList.add('bo-hidden');
         exitFullScreenIcon.classList.add('bo-hidden');
 
@@ -360,15 +342,21 @@ export class BoStoryPopUpService {
             fullScreenIcon.classList.remove('bo-hidden');
         }
 
-        if (storyItem.mediaType === this.utilsService.BO_STORY_MEDIA_TYPE.video) {
-            videoElement.src = storyItem.storyUrl;
-            videoElement.load();
-            videoElement.classList.remove('bo-hidden');
-            videoElement.setAttribute('id', this.mediaElementIdGenerator(storyItem.id, 'video'))
-        } else {
-            imgElement.setAttribute('id', this.mediaElementIdGenerator(storyItem.id, 'img'))
-            imgElement.src = storyItem.storyUrl;
-            imgElement.classList.remove('bo-hidden');
+        if (updateMedia) {
+            videoElement.classList.add('bo-hidden');
+            imgElement.classList.add('bo-hidden');
+
+            if (storyItem.mediaType === this.utilsService.BO_STORY_MEDIA_TYPE.video) {
+                videoElement.src = storyItem.storyUrl;
+                videoElement.load();
+                videoElement.classList.remove('bo-hidden');
+                videoElement.setAttribute('id', this.mediaElementIdGenerator(storyItem.id, 'video'));
+            } else {
+                imgElement.setAttribute('id', this.mediaElementIdGenerator(storyItem.id, 'img'));
+                imgElement.setAttribute('alt', storyItem.imgAlt ?? 'Story item photo');
+                imgElement.src = storyItem.storyUrl;
+                imgElement.classList.remove('bo-hidden');
+            }
         }
 
         if (isPlay) {
@@ -387,8 +375,16 @@ export class BoStoryPopUpService {
             storyItemCaption.innerText = storyItem.caption;
         }
 
-        footerNestedHtmlBody.innerHTML = storyItem.footerNestedHtml ?? '';
+        if (storyItem.footerNestedActionHtml) {
+            storyItemElement.classList.remove('bo-footer-nested-action-html-body-active');
+            footerNestedActionHtmlBody.innerHTML = storyItem.footerNestedActionHtml;
+            this.setStoryItemHeight(storyItemElement, footerNestedActionHtmlBody);
+        } else {
+            storyItemElement.classList.add('bo-footer-nested-action-html-body-active');
+            footerNestedActionHtmlBody.innerHTML = '';
+        }
 
+        footerNestedHtmlBody.innerHTML = storyItem.footerNestedHtml ?? '';
         this.updateSideWrapperPosition();
         return cellElement;
     }
@@ -402,7 +398,10 @@ export class BoStoryPopUpService {
 
         if (this.dataService.currentStoryIndex === 0 && this.dataService.currentStoryItemIndex === 0) {
             arrowLeft?.classList.add('bo-arrow-inactive');
-        } else if (
+        }
+
+        if (
+            this.dataService.storyList.length === 1 && this.dataService.currentStory.items.length === 1 ||
             this.dataService.currentStoryIndex === this.dataService.storyList.length - 1
             && this.dataService.currentStoryItemIndex === this.dataService.currentStory.items.length - 1
         ) {
@@ -410,29 +409,23 @@ export class BoStoryPopUpService {
         }
     }
 
-    videoLoadingState = (video, preloader) => {
-        const fn = () => {
-            preloader.classList.add('bo-hidden');
-            video.removeEventListener('canplaythrough', fn);
-        }
-
-        return fn;
-    }
-
     createStoryItem = (storyData, storyItemData) => {
+        const storyItemBody = this.dataService.document.createElement('div');
+        const footerNestedActionHtmlBody = this.createCellElementFooterNestedHtmlBody(storyItemData);
         const storyItem = this.dataService.document.createElement('div');
         const layer = this.dataService.document.createElement('div');
         const playElement = this.utilsService.convertStrToSvgElement(this.svgElementsService.playIcon);
         const pauseElement = this.utilsService.convertStrToSvgElement(this.svgElementsService.pauseIcon);
         const { videoElement, imgElement } = this.createStoryMedia(storyItemData);
+
         storyItem.append(videoElement);
         storyItem.append(imgElement);
         storyItem.append(layer);
         layer.append(this.createStoryItemHeader(storyData, storyItemData));
         layer.append(this.createFooterNestedHtmlBody(storyItemData));
         layer.append(this.createStoryItemFooter(storyItemData));
-        layer.append(this.createMediaPreloader());
 
+        storyItemBody.classList.add('bo-story-item-body');
         storyItem.classList.add('bo-story-item');
         layer.classList.add('bo-story-item-layer');
 
@@ -442,13 +435,36 @@ export class BoStoryPopUpService {
         pauseElement.classList.add('bo-active-video-action');
         storyItem.appendChild(playElement);
         storyItem.appendChild(pauseElement);
+        storyItemBody.append(storyItem);
+        storyItemBody.append(footerNestedActionHtmlBody);
 
-        return storyItem;
+
+        if (storyItem.footerNestedActionHtml) {
+            this.setStoryItemHeight(storyItem, footerNestedActionHtmlBody);
+        } else {
+            storyItem.classList.add('bo-footer-nested-action-html-body-active');
+        }
+
+        return storyItemBody;
+    }
+
+    stopPropagation(event) {
+        event.stopPropagation();
+    }
+
+    setStoryItemHeight(storyItemElem, footerElem, storyItemData) {
+        setTimeout(() => {
+            storyItemElem.style.height = `calc(100% - ${footerElem.offsetHeight}px)`;
+            storyItemElem.style.minHeight = `calc(100% - ${footerElem.offsetHeight}px)`;
+        });
     }
 
     createStoryMedia = (storyItem) => {
         const videoElement = this.dataService.document.createElement('video');
         const imgElement = this.dataService.document.createElement('img');
+        const encodedLoadingSvg = encodeURIComponent(this.svgElementsService.storyItemImageLoaderIcon)
+            .replace(/'/g, '%27')
+            .replace(/"/g, '%22');
 
         videoElement.setAttribute('height', '100%');
         videoElement.setAttribute('width', '100%');
@@ -457,12 +473,14 @@ export class BoStoryPopUpService {
         videoElement.classList.add('bo-story-item-media');
         videoElement.classList.add('bo-story-item-video');
         videoElement.classList.add('bo-hidden');
+        videoElement.style.backgroundImage = `url("data:image/svg+xml,${encodedLoadingSvg}")`;
 
         imgElement.setAttribute('height', '100%');
         imgElement.setAttribute('width', '100%');
         imgElement.classList.add('bo-story-item-media');
         imgElement.classList.add('bo-story-item-img');
         imgElement.classList.add('bo-hidden');
+        imgElement.style.backgroundImage = `url("data:image/svg+xml,${encodedLoadingSvg}")`;
 
         if (storyItem.mediaType === this.utilsService.BO_STORY_MEDIA_TYPE.video) {
             videoElement.src = '';
@@ -476,6 +494,7 @@ export class BoStoryPopUpService {
             videoElement.setAttribute('id', this.mediaElementIdGenerator(storyItem.id, 'video'));
         } else {
             imgElement.setAttribute('id', this.mediaElementIdGenerator(storyItem.id, 'img'));
+            imgElement.setAttribute('alt', storyItem.imgAlt ?? 'Story item photo');
             imgElement.classList.remove('bo-hidden');
             imgElement.src = storyItem.storyUrl;
         }
@@ -484,17 +503,6 @@ export class BoStoryPopUpService {
             videoElement,
             imgElement
         };
-    }
-
-    createMediaPreloader = () => {
-        const mediaPreloaderBody = this.dataService.document.createElement('div');
-        const mediaPreloader = this.dataService.document.createElement('div');
-        mediaPreloaderBody.append(mediaPreloader);
-        mediaPreloaderBody.classList.add('bo-hidden');
-        mediaPreloaderBody.classList.add('bo-media-preloader-body');
-        mediaPreloader.classList.add('bo-media-preloader');
-
-        return mediaPreloaderBody;
     }
 
     createLikeButton = (storyItemData) => {
@@ -695,6 +703,19 @@ export class BoStoryPopUpService {
         footerNestedHtmlBody.innerHTML = storyItemData.footerNestedHtml ?? '';
 
         return footerNestedHtmlBody;
+    }
+
+    createCellElementFooterNestedHtmlBody = () => {
+        const footerNestedActionHtmlBody = this.dataService.document.createElement('div');
+        footerNestedActionHtmlBody.classList.add('bo-footer-nested-action-html-body');
+        footerNestedActionHtmlBody.addEventListener('click', this.stopPropagation);
+        footerNestedActionHtmlBody.addEventListener('mousedown', this.stopPropagation);
+        footerNestedActionHtmlBody.addEventListener('touchstart', this.stopPropagation);
+        footerNestedActionHtmlBody.addEventListener('touchmove', this.stopPropagation);
+        footerNestedActionHtmlBody.addEventListener('touchend', this.stopPropagation);
+        footerNestedActionHtmlBody.addEventListener('touchcancel', this.stopPropagation);
+
+        return footerNestedActionHtmlBody;
     }
 
     getCurrentStoryCellElement = () => {

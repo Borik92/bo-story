@@ -1,7 +1,3 @@
-import './styles/bo-carousel.css';
-import './styles/bo-story.css';
-import './styles/bo-story-pop-up.css';
-
 import {BoDataService} from './services/bo-data.service.js';
 import {BoStoryEventService} from './services/bo-story-event.service';
 import {BoStoryPopUpService} from './services/bo-story-pop-up.service';
@@ -9,6 +5,9 @@ import {BoCarouselService} from './services/bo-carousel.service';
 import {BoStoryService} from './services/bo-story-service';
 import {BoUtilsService} from './services/bo-utils.service';
 import {BoSvgElementsService} from './services/bo-svg-elements.service';
+import './styles/bo-carousel.css';
+import './styles/bo-story.css';
+import './styles/bo-story-pop-up.css';
 
 export class BoStory {
     #realVhTimeout;
@@ -20,15 +19,13 @@ export class BoStory {
     #utilsService = new BoUtilsService();
     #svgElementsService = new BoSvgElementsService();
 
-    constructor(
-        {
-            storyWrapper,
-            storyList,
-            configs,
-            styleConfigs,
-            events
-        }) {
-        this.#utilsService.dataService = this.#dataService;
+    constructor({
+                    storyWrapper,
+                    storyList,
+                    configs,
+                    styleConfigs,
+                    events
+                }) {
         this.#eventService.dataService = this.#dataService;
         this.#eventService.popUpService = this.#popUpService;
         this.#eventService.storyService = this.#storyService;
@@ -52,18 +49,16 @@ export class BoStory {
         this.#carouselService.popUpService = this.#popUpService;
         this.#storyService.eventService = this.#eventService;
         this.#storyService.dataService = this.#dataService;
+        this.#storyService.svgElementsService = this.#svgElementsService;
+        this.#utilsService.dataService = this.#dataService;
 
-        if (configs?.document && !this.#dataService.document) {
+        if (configs?.document) {
             this.#dataService.document = configs.document;
             this.#dataService.window = configs.document.defaultView;
         }
 
-        if (configs && Object.keys(configs).length) {
-            for (const key in configs) {
-                this.#dataService.configs[key] = configs[key];
-            }
-        }
-
+        this.#storyService.storyItemCountToRend = configs?.storyItemCountToRend ?? 50;
+        this.#dataService.seenByStoryItemOpen = configs?.seenByStoryItemOpen ?? true;
         this.#dataService.storyList = storyList;
         this.#dataService.storyList.sort((a, b) => a.seen - b.seen);
         this.#dataService.initCssVariables(styleConfigs);
@@ -71,33 +66,35 @@ export class BoStory {
         this.#dataService.storyContainer = this.#storyService.createStoriesContainer();
         this.#dataService.storyWrapper = storyWrapper;
 
+        if (configs?.svgElements) {
+            for (const key in configs.svgElements) {
+                this.#svgElementsService[key] = configs.svgElements[key];
+            }
+        }
+
         if (!storyWrapper) {
             throw 'Story container element not provided';
         } else if (!Array.isArray(storyList)) {
             throw 'Story array not provided';
         }
 
-        try {
-            this.#dataService.storyContainer.addEventListener('scroll', this.#storyService.onStoryContainerScroll);
-            storyWrapper.append(this.#dataService.storyContainer);
-            this.#dataService.window.addEventListener('resize', this.#onResize);
+        this.#dataService.storyContainer.addEventListener('scroll', this.#storyService.onStoryContainerScroll);
+        storyWrapper.append(this.#dataService.storyContainer);
+        this.#dataService.window.addEventListener('resize', this.#onResize);
 
-            // Initial stories load
-            this.#storyService.loadMoreContent();
-            this.#detectDevice();
-            this.#detectKeyDown();
-            this.#dataService.setRealVh();
-            this.#preventTapZoom();
-        } catch {
-            console.log('Something went wrong in BO Story!');
-        }
+        // Initial stories load
+        this.#storyService.loadMoreContent();
+        this.#detectDevice();
+        this.#detectKeyDown();
+        this.#dataService.updateViewportUnits();
+        this.#preventTapZoom();
     }
 
     #onResize = () => {
         clearTimeout(this.#realVhTimeout);
         this.#dataService.checkBreakpoints();
         this.#realVhTimeout = setTimeout(() => {
-            this.#dataService.setRealVh();
+            this.#dataService.updateViewportUnits();
             this.#popUpService.updateSideWrapperPosition();
         }, 150);
     }
@@ -127,6 +124,22 @@ export class BoStory {
         this.#dataService.document.addEventListener('mousedown', this.#eventService.onDetectMousedown);
     }
 
+    openStory(id, isVideoMuted = false) {
+        const index = this.#dataService.storyList.findIndex(story => story.id === id);
+
+        if (index >= 0) {
+            this.#popUpService.isVideoMuted = isVideoMuted;
+            this.#dataService.currentStoryIndex = index;
+            this.#eventService.openStoryPopup();
+        } else {
+            console.warn(`openStory: Story with id '${id}' not found`);
+        }
+    }
+
+    closeDialog() {
+        this.#eventService.onClosePopup();
+    }
+
     onDestroy = () => {
         this.#storyService.removeListeners();
         this.#eventService.onClosePopup();
@@ -140,4 +153,20 @@ export class BoStory {
         this.#dataService.storyContainer.removeEventListener('keydown', this.#eventService.onOpenStoryPopupByKeyDown);
         this.#dataService.storyContainer.removeEventListener('scroll', this.#storyService.onStoryContainerScroll);
     }
+}
+
+try {
+    if (typeof window !== 'undefined') {
+        window.BoStory = BoStory;
+    }
+} catch (e) {
+    console.warn(`Please set document
+        new BoStory({
+            configs: {
+                document: Document Object here,
+                ...
+            },
+            ...
+        })`
+    );
 }

@@ -93,6 +93,9 @@
     user-select: none;
     pointer-events: none;
     transition: all .2s;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: var(--bo-story-img-background-size);
 }
 
 .bo-story-badge {

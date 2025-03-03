@@ -2,6 +2,8 @@ export class BoStoryService {
     eventService;
     dataService;
     loadedIndex = 0;
+    svgElementsService;
+    storyItemCountToRend = 0;
 
     createStoryElement = (storyData, index) => {
         const storyBody = this.dataService.document.createElement('div');
@@ -10,6 +12,9 @@ export class BoStoryService {
         const imgWrapper = this.dataService.document.createElement('div');
         const badge = this.dataService.document.createElement('div');
         const badgeText = this.dataService.document.createElement('span');
+        const encodedLoadingSvg = encodeURIComponent(this.svgElementsService.storyImageLoaderIcon)
+            .replace(/'/g, '%27')
+            .replace(/"/g, '%22');
 
         storyBody.classList.add('bo-story-body');
         story.classList.add('bo-story');
@@ -42,6 +47,10 @@ export class BoStoryService {
         story.setAttribute('index', index);
         imgWrapper.setAttribute('tabindex', '0');
         img.setAttribute('src', storyData.imageUrl);
+        img.setAttribute('alt', storyData.imgAlt ?? 'Story photo');
+        img.setAttribute('loading', 'lazy');
+        img.setAttribute('fetchpriority', 'low');
+        img.style.backgroundImage = `url("data:image/svg+xml,${encodedLoadingSvg}")`;
 
         badgeText.innerText = storyData.items.length.toString();
 
@@ -79,14 +88,14 @@ export class BoStoryService {
             return;
         }
 
-        const itemsToLoad = this.dataService.storyList.slice(this.loadedIndex, this.loadedIndex + 50);
+        const itemsToLoad = this.dataService.storyList.slice(this.loadedIndex, this.loadedIndex + this.storyItemCountToRend);
 
         itemsToLoad.forEach((story, index) => {
             const storyElement = this.createStoryElement(story, this.loadedIndex + index);
             this.dataService.storyContainer.append(storyElement);
         });
 
-        this.loadedIndex += 50;
+        this.loadedIndex += this.storyItemCountToRend;
     }
 
     rendStoriesContent = () => {

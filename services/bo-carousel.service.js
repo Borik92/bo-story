@@ -19,6 +19,7 @@ export class BoCarouselService {
     touchStartBodyPausedTimeout;
     touchEndOpacityTriggered = false;
     isTouchendOpacityTriggered = false;
+    updateUpcomingStoryTimeout;
 
     initCarousel = (stories, parentBody) => {
         parentBody.style.left = 'unset';
@@ -83,7 +84,9 @@ export class BoCarouselService {
                     this.currentAngle = this.storyCarouselTheta * (this.storyCarouselIndex + percentageIndexer) * -1;
                 }
 
-                parentBody.style.transform = 'translateZ(' + -(this.storyCarouselRadius - (this.storyCarouselRadius % 1 ? 1 : 0.5)) + 'px) ' + this.storyRotateFn + '(' + this.currentAngle + 'deg)';
+                parentBody.style.transform = 'translateZ(' + -(this.storyCarouselRadius - (this.storyCarouselRadius % 1 ? 1 : 0.5)) + 'px) '
+                    + this.storyRotateFn + '(' + this.currentAngle + 'deg)';
+                parentBody.classList.add('bo-carousel-transition-active');
             });
 
             ['touchend', 'touchcancel'].forEach(eventName => {
@@ -91,6 +94,7 @@ export class BoCarouselService {
                     this.touchEndOpacityTriggered = true;
                     this.isTouchendOpacityTriggered = false;
                     popupContainer.classList.remove('bo-popup-body-paused');
+                    parentBody.classList.remove('bo-carousel-transition-active');
 
                     const swipeOffset = this.storyCarouseEndX - this.storyCarouseStartX;  // Calculate the offset for the swipe
 
@@ -115,7 +119,7 @@ export class BoCarouselService {
                     if (swipeOffset > 0 && this.dataService.currentStoryIndex > 0) {
                         this.popUpService.resetCurrentCellElementProgressBarTransition();
                         this.prepareCarouselToPrevious();
-                        this.prepareStoriesToRender();
+                        this.prepareStoriesToRender(false);
                     } else if (swipeOffset < 0 && this.dataService.currentStoryIndex < stories.length - 1) {
                         this.popUpService.resetCurrentCellElementProgressBarTransition();
                         this.prepareCarouselToNext();
@@ -135,15 +139,12 @@ export class BoCarouselService {
                         this.dataService.currentStory,
                         this.dataService.currentStoryItem,
                         this.dataService.currentStoryIndex,
+                        false,
                         false
                     );
+
                     this.eventService.onStoryItemView();
-                    this.storyRotateCarousel(false, () => {
-                        this.popUpService.unsetCurrentCellElementProgressBarsTransition();
-                    }).then(() => {
-                        clearTimeout(this.popUpService.progressClearInterval);
-                        this.popUpService.onPlayCurrentStoryItem();
-                    });
+                    this.storyRotateMobileCarousel()
 
                     this.storyCarouseEndX = 0;
                     this.storyCarouseStartX = 0;
@@ -173,6 +174,21 @@ export class BoCarouselService {
         const angle = this.storyCarouselTheta * (this.storyCarouselIndex) * -1;
         parentBody.style.transform = 'translateZ(' + -this.storyCarouselRadius + 'px) ' +
             this.storyRotateFn + '(' + angle + 'deg)';
+    }
+
+    storyRotateMobileCarousel() {
+        const parentBody = this.dataService.document.querySelector('.bo-popup-body');
+        const targetAngle = this.storyCarouselTheta * (this.storyCarouselIndex) * -1;
+        parentBody.style.transition = 'transform 0.2s linear';
+        parentBody.style.transform = 'translateZ(' + -this.storyCarouselRadius + 'px) ' +
+            this.storyRotateFn + '(' + targetAngle + 'deg)';
+
+        setTimeout(() => {
+            parentBody.style.transition = ''; // Remove the transition after it finishes
+            this.popUpService.unsetCurrentCellElementProgressBarsTransition();
+            clearTimeout(this.popUpService.progressClearInterval);
+            this.popUpService.onPlayCurrentStoryItem();
+        }, 200);
     }
 
     storyRotateCarousel(skipSlide = false, callback) {
@@ -258,7 +274,7 @@ export class BoCarouselService {
             return;
         }
 
-        if (this.dataService.currentStory.items.every(item => item.seen) && this.dataService.configs.seenByStoryItemOpen) {
+        if (this.dataService.currentStory.items.every(item => item.seen) && this.dataService.seenByStoryItemOpen) {
             this.eventService.onStorySeen();
         }
 
@@ -268,8 +284,11 @@ export class BoCarouselService {
         this.eventService.onStoryItemSeenStoryOpen();
     }
 
-    prepareStoriesToRender = (isNext) => {
-        if (this.dataService.currentStoryIndex >= this.dataService.storyList.length - 1 && isNext || this.dataService.currentStoryIndex <= 0 && !isNext) {
+    prepareStoriesToRender = (isNext, step = 1) => {
+        if (
+            this.dataService.currentStoryIndex >= this.dataService.storyList.length - 1 && isNext
+            || this.dataService.currentStoryIndex <= 0 && !isNext
+        ) {
             return;
         }
 
@@ -286,19 +305,26 @@ export class BoCarouselService {
             }
         }
 
-        const index = isNext ? this.dataService.currentStoryIndex + 1 : this.dataService.currentStoryIndex - 1;
+        const index = isNext ? this.dataService.currentStoryIndex + step : this.dataService.currentStoryIndex - step;
 
-        this.updateUpcomingStory(index, true);
+        this.updateUpcomingStory(index);
+
+        clearTimeout(this.updateUpcomingStoryTimeout);
+
+        this.updateUpcomingStoryTimeout = setTimeout(() => {
+            if (isNext && this.dataService.currentStoryIndex - 1 >= 0) {
+                this.updateUpcomingStory(this.dataService.currentStoryIndex - 1);
+            } else if (!isNext && this.dataService.currentStoryIndex + 1 <= this.dataService.storyList.length - 1) {
+                this.updateUpcomingStory(this.dataService.currentStoryIndex + 1);
+            }
+        }, 195);
     }
 
-    updateUpcomingStory(index, isNext) {
+    updateUpcomingStory(index) {
         const story = this.dataService.storyList[index];
         let storyItem = story.items[story.items.findIndex(item => !item.seen)];
-
-        if (!storyItem && isNext) {
+        if (!storyItem) {
             storyItem = story.items[0];
-        } else if (!storyItem) {
-            storyItem = story.items[story.items.length - 1];
         }
 
         const cellHeaderElement = this.popUpService.getStoryCellElementByIndex(index).querySelector('.bo-story-item-header');

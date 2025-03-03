@@ -1,5 +1,9 @@
 export class BoStory {
     constructor(options?: IBoStoryOptions);
+
+    openStory: (id: string | number, isVideoMuted?: boolean) => void;
+    closeDialog: () => void;
+    onDestroy: () => void;
 }
 
 interface IBoStoryOptions {
@@ -28,6 +32,7 @@ interface IBoStory {
     imageUrl: string;
     titleNestedHtml?: string;
     items: IBoStoryItem[];
+    imgAlt?: string;
 }
 
 interface IBoStoryItem {
@@ -43,13 +48,28 @@ interface IBoStoryItem {
     description?: string;
     footerNestedHtml?: string;
     caption?: string;
+    footerNestedActionHtml?: string;
+    imgAlt?: string;
 }
 
 interface IBoConfigs {
     seenByStoryItemOpen?: boolean;
-    isSmScreenScrollbarHidden?: boolean;
-    isCustomScrollbar?: boolean;
-    document: Document;
+    storyItemCountToRend?: number;
+    document?: Document,
+    svgElements?: {
+        arrowLeftIcon?: string;
+        arrowRightIcon?: string;
+        closeIcon?: string;
+        likeIcon?: string;
+        fullScreenIcon?: string;
+        exitFullScreenIcon?: string;
+        mutatedIcon?: string;
+        unmutatedIcon?: string;
+        playIcon?: string;
+        pauseIcon?: string;
+        storyImageLoaderIcon?: string;
+        storyItemImageLoaderIcon?: string;
+    }
 }
 
 interface IBoStyleConfigs {
@@ -88,6 +108,8 @@ interface IBoStyleConfigs {
     bo_popup_z_index?: string,
 
     /*  Custom Scrollbar  */
+    bo_is_sm_screen_scrollbar_hidden ?: boolean;
+    bo_is_custom_scrollbar ?: boolean;
     bo_custom_scrollbar_width?: string,
     bo_custom_scrollbar_height?: string,
     bo_scrollbar_distance?: string,

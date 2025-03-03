@@ -11,12 +11,7 @@ export class BoDataService {
     currentStoryIndex = 0;
     currentStoryItemIndex = 0;
     smScreenMax = 768;
-    seenByStoryItemOpen = false;
-
-    configs = {
-        isSmScreenScrollbarHidden: true,
-        isCustomScrollbar: false
-    }
+    seenByStoryItemOpen = true;
 
     styleConfigs = {
         /* Story variables */
@@ -34,6 +29,7 @@ export class BoDataService {
         bo_story_img_height: '100%',
         bo_story_img_width: '100%',
         bo_story_img_border_radius: '50%',
+        bo_story_img_background_size: '25px',
 
         /* Story badge */
         bo_story_badge_height: '24px',
@@ -92,11 +88,11 @@ export class BoDataService {
             );
         }
 
-        if (this.configs.isCustomScrollbar) {
+        if (this.styleConfigs.bo_is_custom_scrollbar) {
             this.document.body.classList.add('bo-custom-scrollbar');
         }
 
-        if (this.configs.isSmScreenScrollbarHidden) {
+        if (this.styleConfigs.bo_is_sm_screen_scrollbar_hidden) {
             this.document.body.classList.add('bo-sm-screen-scrollbar-hidden');
         }
     }
@@ -149,7 +145,7 @@ export class BoDataService {
     }
 
     // Set the value when the page is loaded
-    setRealVh = () => {
+    updateViewportUnits = () => {
         let vh = this.window.innerHeight * 0.01;
         let vw = this.window.innerWidth * 0.01;
         this.document.documentElement.style.setProperty('--real-vh', `${vh}px`);

@@ -1,5 +1,5 @@
 .bo-popup-container {
-    height: 100vh;
+    height: calc(var(--real-vh) * 100);
     width: 100%;
     display: flex;
     align-items: center;
@@ -13,6 +13,8 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    min-height: -webkit-fill-available;
+    min-width: -webkit-fill-available;
 }
 .bo-popup-container * {
     margin: 0;
@@ -75,13 +77,28 @@
 
 .bo-arrow-inactive, .bo-arrow-inactive:hover {
     opacity: .25;
+    cursor: default;
+}
+
+.bo-story-item-body {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .bo-story-item {
-    height: 100%;
     width: 100%;
     position: relative;
     background: #000;
+}
+
+.bo-footer-nested-action-html-body-active {
+    height: 100% !important;
+}
+
+.bo-footer-nested-action-html-body-active .bo-story-item-footer {
+    padding-bottom: 20px;
 }
 
 .bo-story-item-layer {
@@ -197,6 +214,9 @@
     object-fit: contain;
     overflow-clip-margin: content-box;
     overflow: clip;
+    background-size: 50px;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .bo-story-item-like-btn {
@@ -238,7 +258,7 @@
 .bo-story-item-footer {
     display: flex;
     flex-direction: column;
-    padding: 0 6px 20px 6px;
+    padding: 0 6px 8px 6px;
     z-index: 2;
 }
 
@@ -248,7 +268,12 @@
     padding: 0 6px;
 }
 
+.bo-footer-nested-action-html-body {
+    background: #000;
+}
+
 .bo-story-tem-caption {
+    word-break: break-word;
     margin-top: 20px;
     color: #fff;
 }
@@ -371,6 +396,7 @@
 .bo-story-small-screen .bo-popup-container {
     height: calc(var(--real-vh) * 100); /* This is equivalent to 100vh */
     overflow: hidden;
+    background-color: #000;
 }
 
 .bo-story-small-screen .bo-popup-wrapper {
@@ -392,12 +418,24 @@
     display: flex;
 }
 
+.bo-story-small-screen .bo-story-item-media {
+    overflow: hidden;
+}
+
+.bo-story-small-screen .bo-carousel-transition-active  .bo-story-item-media {
+    border-radius: 4px;
+}
+
 .bo-story-small-screen .bo-story-item-header {
     padding: 20px 30px 0 30px;
 }
 
 .bo-story-small-screen .bo-story-item-footer {
-    padding: 10px 30px 30px 30px;
+    padding: 10px 30px 8px 30px;
+}
+
+.bo-story-small-screen .bo-footer-nested-action-html-body-active .bo-story-item-footer {
+    padding-bottom: 30px;
 }
 
 .bo-story-small-screen .bo-footer-nested-html-body {

@@ -59,12 +59,20 @@ export class BoStoryEventService {
         }
 
         if (this.findByClass(eventTarget, 'bo-arrow-left-icon')) {
+            if (this.findByClass(eventTarget, 'bo-arrow-inactive')) {
+                return;
+            }
+
             clearInterval(this.popUpService.progressClearInterval);
             this.onPreviousStoryItem();
             return;
         }
 
         if (this.findByClass(eventTarget, 'bo-arrow-right-icon')) {
+            if (this.findByClass(eventTarget, 'bo-arrow-inactive')) {
+                return;
+            }
+
             clearInterval(this.popUpService.progressClearInterval);
             this.onNextStoryItem();
             return;
@@ -141,8 +149,10 @@ export class BoStoryEventService {
                 return;
             }
         } else if (event.key === 'ArrowRight') {
+            clearInterval(this.popUpService.progressClearInterval);
             this.onNextStoryItem();
         } else if (event.key === 'ArrowLeft') {
+            clearInterval(this.popUpService.progressClearInterval);
             this.onPreviousStoryItem();
         } else if (event.code === 'Space') {
             this.onToggleStoryPlayOrPauseByValue(!this.isStoryPlaying);
@@ -296,13 +306,13 @@ export class BoStoryEventService {
             this.onStoryItemSeenAfterView();
 
             if (this.dataService.currentStoryIndex >= this.dataService.storyList.length - 1) {
-                if (this.dataService.currentStory.items.every(item => item.seen) && !this.dataService.configs.seenByStoryItemOpen) {
+                if (this.dataService.currentStory.items.every(item => item.seen) && !this.dataService.seenByStoryItemOpen) {
                     this.onStorySeen();
                 }
 
                 this.onClosePopupFromLastElement(false);
             } else {
-                if (!this.dataService.configs.seenByStoryItemOpen) {
+                if (!this.dataService.seenByStoryItemOpen) {
                     this.onStorySeen();
                 }
 
@@ -335,10 +345,10 @@ export class BoStoryEventService {
     onPreviousStoryItem = () => {
         this.onStoryItemView();
         if (this.dataService.currentStoryItemIndex === 0) {
-           this.onStoryItemSeenAfterView();
+            this.onStoryItemSeenAfterView();
 
             if (this.dataService.currentStoryIndex === 0) {
-                if (this.dataService.currentStory.items.every(item => item.seen) && !this.dataService.configs.seenByStoryItemOpen) {
+                if (this.dataService.currentStory.items.every(item => item.seen) && !this.dataService.seenByStoryItemOpen) {
                     this.onStorySeen();
                 }
 
@@ -632,13 +642,13 @@ export class BoStoryEventService {
     }
 
     onStoryItemSeenAfterView = () => {
-        if (!this.dataService.configs.seenByStoryItemOpen) {
+        if (!this.dataService.seenByStoryItemOpen) {
             this.onStoryItemSeen();
         }
     }
 
     onStoryItemSeenStoryOpen = () => {
-        if (this.dataService.configs.seenByStoryItemOpen) {
+        if (this.dataService.seenByStoryItemOpen) {
             this.onStoryItemSeen();
         }
     }
@@ -649,6 +659,7 @@ export class BoStoryEventService {
         }
 
         this.dataService.currentStoryItem.seen = true;
+        this.dataService.currentStory.seen = this.dataService.currentStory.items.every(story => story.seen);
         const seenEvent = new CustomEvent(this.storyItemSeenEventName, { detail: this.dataService.currentStoryItem});
         this.dataService.storyWrapper.dispatchEvent(seenEvent);
 

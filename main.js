@@ -18,7 +18,10 @@ const storyList = [
                 timeSince: '22 hours',
                 likeCount: 2,
                 storyUrl: 'https://api.fourthway.am/static-media/story/video/camera.mov',
-                footerNestedHtml: `<p style='color: white; padding: 5px'>Capture the moment and let the world see through your lens. Unveiling the art of photography with our PRO II series — where every click tells a story. 📸✨ #PhotographyPassion #PROIISeries</p>`
+                footerNestedHtml: `<p style='color: white; padding: 5px'>Capture the moment and let the world see through your lens. Unveiling the art of photography with our PRO II series — where every click tells a story. 📸✨ #PhotographyPassion #PROIISeries</p>`,
+                footerNestedActionHtml: `<button>Click me</button>`,
+                caption: "Daddy facciamo un viaggio insieme? :P",
+                poster: "Hhhhh hh hh h hh hh",
             },
             {
                 id: 311,
@@ -181,7 +184,6 @@ const storyList = [
 new BoStory({
     storyList,
     storyWrapper: document.getElementById('my-container-1'),
-    configs: { seenByStoryItemOpen: true },
     events: {
         onLike: event => console.log(event),
         onUnlike: event => console.log(event),
