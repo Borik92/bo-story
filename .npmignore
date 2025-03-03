@@ -3,5 +3,6 @@
 
 # But do not ignore these specific files:
 !bo-story-bundle.mjs
+!bo-story-bundle.js
 !bo-story-bundle.css
 !bo-story-bundle.d.ts
