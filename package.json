@@ -1,6 +1,6 @@
 {
   "name": "bo-story",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "",
   "main": "bo-story-bundle.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "watch": "webpack --watch --mode production",
     "start-server": "node server.js",
     "prepublishOnly": "cpy 'dist/bo-story-bundle.*' ./",
-    "postpublish": "rimraf bo-story-bundle.mjs bo-story-bundle.css",
+    "postpublish": "rimraf bo-story-bundle.mjs bo-story-bundle.js bo-story-bundle.css",
     "publish-to-npm": "npm run build && npm publish --access=public"
   },
   "files": [
