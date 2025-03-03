@@ -83,17 +83,17 @@ export class BoDataService {
         }
 
         for (const configsKey in this.styleConfigs) {
-            this.document.documentElement.style.setProperty(
+            this.document?.documentElement.style.setProperty(
                 `--${configsKey.replaceAll('_', '-')}`, `${this.styleConfigs[configsKey]}`
             );
         }
 
         if (this.styleConfigs.bo_is_custom_scrollbar) {
-            this.document.body.classList.add('bo-custom-scrollbar');
+            this.document?.body.classList.add('bo-custom-scrollbar');
         }
 
         if (this.styleConfigs.bo_is_sm_screen_scrollbar_hidden) {
-            this.document.body.classList.add('bo-sm-screen-scrollbar-hidden');
+            this.document?.body.classList.add('bo-sm-screen-scrollbar-hidden');
         }
     }
 
@@ -146,9 +146,11 @@ export class BoDataService {
 
     // Set the value when the page is loaded
     updateViewportUnits = () => {
-        let vh = this.window.innerHeight * 0.01;
-        let vw = this.window.innerWidth * 0.01;
-        this.document.documentElement.style.setProperty('--real-vh', `${vh}px`);
-        this.document.documentElement.style.setProperty('--real-vw', `${vw}px`);
+        if (this.document) {
+            let vh = this.window.innerHeight * 0.01;
+            let vw = this.window.innerWidth * 0.01;
+            this.document.documentElement.style.setProperty('--real-vh', `${vh}px`);
+            this.document.documentElement.style.setProperty('--real-vw', `${vw}px`);
+        }
     }
 }
